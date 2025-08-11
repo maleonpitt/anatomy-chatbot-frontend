@@ -1,0 +1,18 @@
+version: 0.0
+os: linux
+files:
+  - source: /build
+    destination: /srv/chatbot-frontend/build
+hooks:
+  BeforeInstall:
+    - location: codedeploy_scripts/frontend_before_install.sh
+      timeout: 300
+      runas: root
+  AfterInstall:
+    - location: codedeploy_scripts/frontend_after_install.sh
+      timeout: 300
+      runas: root
+  ApplicationStart:
+    - location: codedeploy_scripts/frontend_application_start.sh
+      timeout: 120
+      runas: root
