@@ -5,7 +5,9 @@ import CAdmin from "./components/c-admin";
 import AiNotice from "./components/AiNotice"; // <-- added
 import "./App.css";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL;
+// Added fallback so API_BASE_URL always has a value
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL || "https://app2.heilab.pitt.edu/api";
 
 function ChatbotPage() {
   const [question, setQuestion] = useState("");
@@ -85,7 +87,6 @@ function ChatbotPage() {
   return (
     <div className="chat-container">
       <h1>Human Anatomy Chatbot</h1>
-      <AiNotice /> {/* <-- added */}
 
       {!isLoggedIn ? (
         <div className="login-container">
@@ -143,6 +144,9 @@ function ChatbotPage() {
             />
             <button onClick={handleAsk}>Ask</button>
           </div>
+
+          {/* Moved AI Notice to appear after chat input */}
+          <AiNotice />
         </>
       )}
     </div>
