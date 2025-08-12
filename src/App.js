@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import axios from "axios";
-import CAdmin from './components/c-admin';
+import CAdmin from "./components/c-admin";
+import AiNotice from "./components/AiNotice"; // <-- added
 import "./App.css";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
@@ -16,10 +17,11 @@ function ChatbotPage() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/login`, {
-        email: userEmail,
-        password: password,
-      }, { withCredentials: true });
+      const response = await axios.post(
+        `${API_BASE_URL}/login`,
+        { email: userEmail, password },
+        { withCredentials: true }
+      );
 
       if (response.data.success) {
         setIsLoggedIn(true);
@@ -37,7 +39,7 @@ function ChatbotPage() {
     try {
       const response = await axios.post(`${API_BASE_URL}/signup`, {
         email: userEmail,
-        password: password,
+        password,
       });
 
       if (response.data.success) {
@@ -58,10 +60,7 @@ function ChatbotPage() {
       return;
     }
 
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { sender: "user", text: question },
-    ]);
+    setMessages((prev) => [...prev, { sender: "user", text: question }]);
 
     try {
       const response = await axios.post(`${API_BASE_URL}/chat`, {
@@ -69,15 +68,15 @@ function ChatbotPage() {
         userEmail: isLoggedIn ? userEmail : "anonymous",
       });
 
-      setMessages((prevMessages) => [
-        ...prevMessages,
+      setMessages((prev) => [
+        ...prev,
         { sender: "bot", text: response.data.answer },
       ]);
       setQuestion("");
     } catch (error) {
       console.error("Error fetching response:", error);
-      setMessages((prevMessages) => [
-        ...prevMessages,
+      setMessages((prev) => [
+        ...prev,
         { sender: "bot", text: "Error retrieving response. Please try again." },
       ]);
     }
@@ -86,6 +85,8 @@ function ChatbotPage() {
   return (
     <div className="chat-container">
       <h1>Human Anatomy Chatbot</h1>
+      <AiNotice /> {/* <-- added */}
+
       {!isLoggedIn ? (
         <div className="login-container">
           <h2>{showLogin ? "Login" : "Signup"}</h2>
@@ -125,7 +126,9 @@ function ChatbotPage() {
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`message ${message.sender === "user" ? "user-message" : "bot-message"}`}
+                className={`message ${
+                  message.sender === "user" ? "user-message" : "bot-message"
+                }`}
               >
                 <p>{message.text}</p>
               </div>
