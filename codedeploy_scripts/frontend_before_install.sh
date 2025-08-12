@@ -4,8 +4,11 @@ set -euo pipefail
 SERVER_NAME="app2.heilab.pitt.edu"
 API_UPSTREAM="http://127.0.0.1:5000"   # <-- change if your backend is elsewhere
 
+# Ensure we can overwrite the file (remove immutable flag if set)
+sudo chattr -i /etc/nginx/sites-available/chatbot-frontend 2>/dev/null || true
+
 # Write the HTTP site (Certbot will upgrade it to HTTPS)
-cat >/etc/nginx/sites-available/chatbot-frontend <<NGINX
+sudo tee /etc/nginx/sites-available/chatbot-frontend > /dev/null <<NGINX
 server {
     listen 80;
     listen [::]:80;
@@ -34,19 +37,21 @@ server {
 }
 NGINX
 
-ln -sf /etc/nginx/sites-available/chatbot-frontend /etc/nginx/sites-enabled/chatbot-frontend
-rm -f /etc/nginx/sites-enabled/default || true
-nginx -t
-systemctl restart nginx
+# Ensure symlink exists
+sudo ln -sf /etc/nginx/sites-available/chatbot-frontend /etc/nginx/sites-enabled/chatbot-frontend
+sudo rm -f /etc/nginx/sites-enabled/default || true
 
-# Issue a certificate (first time only). Set a real email you control.
+# Test and restart Nginx
+sudo nginx -t
+sudo systemctl restart nginx
+
+# Issue a certificate (first time only)
 if [ ! -f "/etc/letsencrypt/live/${SERVER_NAME}/fullchain.pem" ]; then
-  certbot --nginx --non-interactive --agree-tos \
-          -m you@example.com \
-          -d "${SERVER_NAME}" \
-          --redirect
+  sudo certbot --nginx --non-interactive --agree-tos \
+               -m you@example.com \
+               -d "${SERVER_NAME}" \
+               --redirect
 fi
 
-nginx -t
-systemctl reload nginx
-
+sudo nginx -t
+sudo systemctl reload nginx
